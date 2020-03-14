@@ -7,8 +7,12 @@ public class HoloLens2Example : ModuleRules
 	public HoloLens2Example(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+
+		// Custom items added for QR Code detection
+		AddEngineThirdPartyPrivateStaticDependencies(Target, "WindowsMixedRealityInterop");
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HoloLensAR", "AugmentedReality" });
+
+		// PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
