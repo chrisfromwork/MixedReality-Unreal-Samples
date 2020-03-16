@@ -8,8 +8,43 @@
 #include "ARTrackable.h"
 #include "ARTrackableNotifyComponent.h"
 #include <map>
+#include <chrono>
 #include "QRCodeTransformObserver.generated.h"
 
+struct Coordinate
+{
+	FGuid uniqueId;
+	FTransform localToWorld;
+	std::chrono::system_clock::time_point lastUpdate;
+	FString type;
+	FString data;
+
+	Coordinate()
+	{
+		uniqueId = FGuid{};
+		localToWorld = FTransform{};
+		lastUpdate = std::chrono::system_clock::now();
+		type = TEXT("Unknown");
+		data = TEXT("");
+	}
+};
+
+struct QRCode : Coordinate
+{
+	QRCode() : Coordinate()
+	{
+		type = TEXT("QRCode");
+	}
+
+	QRCode(const UARTrackedQRCode* qrCode, const FTransform& transform) : Coordinate()
+	{
+		uniqueId = qrCode->UniqueId;
+		localToWorld = transform;
+		lastUpdate = std::chrono::system_clock::now();
+		type = TEXT("QRCode");
+		data = qrCode->QRCode;
+	}
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class HOLOLENS2EXAMPLE_API UQRCodeTransformObserver : public UARTrackableNotifyComponent
@@ -29,8 +64,14 @@ protected:
 	virtual void OnQRCodeAdded(UARTrackedQRCode* qrCode);
 	virtual void OnQRCodeUpdated(UARTrackedQRCode* qrCode);
 	virtual void OnQRCodeRemoved(UARTrackedQRCode* qrCode);
+	void UpdateDebugVisual(const FGuid& uniqueId, const FTransform& localToWorld);
+	void DestroyDebugVisual(const FGuid& uniqueId);
 	
-	std::map<FString, std::map<FGuid, UARTrackedQRCode*>> qrCodes;
+	UPROPERTY(VisibleAnywhere)
+	FRotator QRCodeRotation = FRotator{ 180, 90, 0 };
+
+	std::map<FGuid, Coordinate> qrCodes;
+	std::map<FGuid, AActor*> debugVisuals;
 
 private:
 	UFUNCTION()

@@ -57,37 +57,68 @@ void UQRCodeTransformObserver::OnImageRemoved(UARTrackedImage* image)
 
 void UQRCodeTransformObserver::OnQRCodeAdded(UARTrackedQRCode* qrCode)
 {
-	qrCodes[qrCode->QRCode][qrCode->UniqueId] = qrCode;
-
 	FString qrText(L"QRCode Added:");
 	qrText.Append(qrCode->QRCode);
 	qrText.Append(", ");
 	qrText.Append(qrCode->UniqueId.ToString());
 	DebugHelper::PrintDebugLog(qrText, 1);
+
+	FTransform localToWorld = FTransform{ QRCodeRotation } * qrCode->GetLocalToWorldTransform();
+	qrCodes[qrCode->UniqueId] = QRCode{ qrCode, localToWorld };
+	UpdateDebugVisual(qrCode->UniqueId, localToWorld);
 }
 
 void UQRCodeTransformObserver::OnQRCodeUpdated(UARTrackedQRCode* qrCode)
 {
-	qrCodes[qrCode->QRCode][qrCode->UniqueId] = qrCode;
-
 	FString qrText(L"QRCode Updated:");
 	qrText.Append(qrCode->QRCode);
 	qrText.Append(", ");
 	qrText.Append(qrCode->UniqueId.ToString());
 	DebugHelper::PrintDebugLog(qrText, 1);
+
+	FTransform localToWorld = FTransform{ QRCodeRotation } *qrCode->GetLocalToWorldTransform();
+	qrCodes[qrCode->UniqueId] = QRCode{ qrCode, localToWorld };
+	UpdateDebugVisual(qrCode->UniqueId, localToWorld);
 }
 
 void UQRCodeTransformObserver::OnQRCodeRemoved(UARTrackedQRCode* qrCode)
 {
-	if (qrCodes.count(qrCode->QRCode) != 0 &&
-		qrCodes.at(qrCode->QRCode).count(qrCode->UniqueId) != 0)
-	{
-		qrCodes.at(qrCode->QRCode).erase(qrCode->UniqueId);
-	}
-
 	FString qrText(L"QRCode Removed:");
 	qrText.Append(qrCode->QRCode);
 	qrText.Append(", ");
 	qrText.Append(qrCode->UniqueId.ToString());
 	DebugHelper::PrintDebugLog(qrText, 1);
+
+	if (qrCodes.count(qrCode->UniqueId) != 0)
+	{
+		qrCodes.erase(qrCode->UniqueId);
+	}
+
+	DestroyDebugVisual(qrCode->UniqueId);
+}
+
+void UQRCodeTransformObserver::UpdateDebugVisual(const FGuid& uniqueId, const FTransform& localToWorld)
+{
+	AActor* debugVisual;
+	if (debugVisuals.count(uniqueId) != 0)
+	{
+		debugVisual = debugVisuals[uniqueId];
+	}
+	else if(DebugHelper::TryCreateDebugVisual(GetOwner()->GetWorld(), debugVisual))
+	{
+		debugVisuals[uniqueId] = debugVisual;
+	}
+
+	if (debugVisual)
+	{
+		debugVisual->SetActorTransform(localToWorld);
+	}
+}
+
+void UQRCodeTransformObserver::DestroyDebugVisual(const FGuid& uniqueId)
+{
+	if (debugVisuals.count(uniqueId) != 0)
+	{
+		debugVisuals.erase(uniqueId);
+	}
 }
