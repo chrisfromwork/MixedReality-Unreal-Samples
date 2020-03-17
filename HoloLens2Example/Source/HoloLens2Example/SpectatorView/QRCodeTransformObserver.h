@@ -7,44 +7,8 @@
 #include "HoloLensARFunctionLibrary.h"
 #include "ARTrackable.h"
 #include "ARTrackableNotifyComponent.h"
-#include <map>
-#include <chrono>
+#include "QRCode.h"
 #include "QRCodeTransformObserver.generated.h"
-
-struct Coordinate
-{
-	FGuid uniqueId;
-	FTransform localToWorld;
-	std::chrono::system_clock::time_point lastUpdate;
-	FString type;
-	FString data;
-
-	Coordinate()
-	{
-		uniqueId = FGuid{};
-		localToWorld = FTransform{};
-		lastUpdate = std::chrono::system_clock::now();
-		type = TEXT("Unknown");
-		data = TEXT("");
-	}
-};
-
-struct QRCode : Coordinate
-{
-	QRCode() : Coordinate()
-	{
-		type = TEXT("QRCode");
-	}
-
-	QRCode(const UARTrackedQRCode* qrCode, const FTransform& transform) : Coordinate()
-	{
-		uniqueId = qrCode->UniqueId;
-		localToWorld = transform;
-		lastUpdate = std::chrono::system_clock::now();
-		type = TEXT("QRCode");
-		data = qrCode->QRCode;
-	}
-};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class HOLOLENS2EXAMPLE_API UQRCodeTransformObserver : public UARTrackableNotifyComponent
@@ -54,9 +18,6 @@ class HOLOLENS2EXAMPLE_API UQRCodeTransformObserver : public UARTrackableNotifyC
 public:	
 	// Sets default values for this component's properties
 	UQRCodeTransformObserver();
-
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
 	// Called when the game starts
@@ -70,8 +31,8 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	FRotator QRCodeRotation = FRotator{ 180, 90, 0 };
 
-	std::map<FGuid, Coordinate> qrCodes;
-	std::map<FGuid, AActor*> debugVisuals;
+	TMap<FGuid, FQRCode> qrCodes;
+	TMap<FGuid, AActor*> debugVisuals;
 
 private:
 	UFUNCTION()
