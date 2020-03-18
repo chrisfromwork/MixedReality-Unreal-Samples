@@ -5,25 +5,25 @@
 #include "CoreMinimal.h"
 #include "Coordinate.Generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FCoordinate
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FGuid uniqueId;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FTransform localToWorld;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FDateTime lastUpdate;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString type;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString data;
 
 	FCoordinate()
 	{
-		uniqueId = FGuid{};
+		uniqueId = FGuid::NewGuid();
 		localToWorld = FTransform{};
 		lastUpdate = FDateTime::UtcNow();
 		type = TEXT("Unknown");

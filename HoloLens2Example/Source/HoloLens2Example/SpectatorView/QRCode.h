@@ -7,7 +7,7 @@
 #include "ARTrackable.h"
 #include "QRCode.Generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FQRCode : public FCoordinate
 {
 	GENERATED_USTRUCT_BODY()
