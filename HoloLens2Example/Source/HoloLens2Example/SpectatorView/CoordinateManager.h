@@ -15,15 +15,15 @@ class HOLOLENS2EXAMPLE_API ACoordinateManager : public AActor
 public:
 	ACoordinateManager();
 	static ACoordinateManager* Instance() { return instance; }
+	static void PopulateInstance(UWorld* world, AActor* creator);
 
-	UFUNCTION(Server, Reliable, WithValidation)
 	void UpdateCoordinate(const FUserCoordinate& coordinate);
-	UFUNCTION(Server, Reliable, WithValidation)
 	void RemoveCoordinate(const FGuid& uniqueId);
 
 	UPROPERTY(Replicated, EditAnywhere)
 	TMap<FGuid, FUserCoordinate> Coordinates;
 
 protected:
+	virtual void BeginPlay() override;
 	static ACoordinateManager* instance;
 };

@@ -10,15 +10,15 @@ struct FCoordinate
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	FGuid uniqueId;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	FTransform localToWorld;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	FDateTime lastUpdate;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	FString type;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	FString data;
 
 	FCoordinate()
@@ -29,4 +29,17 @@ struct FCoordinate
 		type = TEXT("Unknown");
 		data = TEXT("");
 	}
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCoordinateDelegate, const FCoordinate&, coordinate);
+
+class ICoordinateObserver
+{
+public:
+	UPROPERTY(BlueprintAssignable, Category = "SpectatorView")
+	FCoordinateDelegate OnCoordinateAdded;
+	UPROPERTY(BlueprintAssignable, Category = "SpectatorView")
+	FCoordinateDelegate OnCoordinateUpdated;
+	UPROPERTY(BlueprintAssignable, Category = "SpectatorView")
+	FCoordinateDelegate OnCoordinateRemoved;
 };

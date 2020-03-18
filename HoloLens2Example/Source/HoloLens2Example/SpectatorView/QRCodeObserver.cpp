@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "QRCodeTransformObserver.h"
+#include "QRCodeObserver.h"
 #include "DebugHelper.h"
 
 // Sets default values for this component's properties
-UQRCodeTransformObserver::UQRCodeTransformObserver()
+UQRCodeObserver::UQRCodeObserver()
 {
 	// TODO - test whether a tick is needed for detection
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
@@ -13,17 +13,21 @@ UQRCodeTransformObserver::UQRCodeTransformObserver()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-// Called when the game starts
-void UQRCodeTransformObserver::BeginPlay()
+void UQRCodeObserver::BeginPlay()
 {
 	Super::BeginPlay();
-	OnAddTrackedImage.AddDynamic(this, &UQRCodeTransformObserver::OnImageAdded);
-	OnUpdateTrackedImage.AddDynamic(this, &UQRCodeTransformObserver::OnImageUpdated);
-	OnRemoveTrackedImage.AddDynamic(this, &UQRCodeTransformObserver::OnImageRemoved);
-	UHoloLensARFunctionLibrary::StartQRCodeCapture();
+
+	if (Cast<APawn>(GetOwner()) != nullptr &&
+		Cast<APawn>(GetOwner())->IsLocallyControlled())
+	{
+		OnAddTrackedImage.AddDynamic(this, &UQRCodeObserver::OnImageAdded);
+		OnUpdateTrackedImage.AddDynamic(this, &UQRCodeObserver::OnImageUpdated);
+		OnRemoveTrackedImage.AddDynamic(this, &UQRCodeObserver::OnImageRemoved);
+		UHoloLensARFunctionLibrary::StartQRCodeCapture();
+	}
 }
 
-void UQRCodeTransformObserver::OnImageAdded(UARTrackedImage* image)
+void UQRCodeObserver::OnImageAdded(UARTrackedImage* image)
 {
 	auto qrCode = Cast<UARTrackedQRCode>(image);
 	if (qrCode)
@@ -32,7 +36,7 @@ void UQRCodeTransformObserver::OnImageAdded(UARTrackedImage* image)
 	}
 }
 
-void UQRCodeTransformObserver::OnImageUpdated(UARTrackedImage* image)
+void UQRCodeObserver::OnImageUpdated(UARTrackedImage* image)
 {
 	auto qrCode = Cast<UARTrackedQRCode>(image);
 	if (qrCode)
@@ -41,7 +45,7 @@ void UQRCodeTransformObserver::OnImageUpdated(UARTrackedImage* image)
 	}
 }
 
-void UQRCodeTransformObserver::OnImageRemoved(UARTrackedImage* image)
+void UQRCodeObserver::OnImageRemoved(UARTrackedImage* image)
 {
 	auto qrCode = Cast<UARTrackedQRCode>(image);
 	if (qrCode)
@@ -50,7 +54,7 @@ void UQRCodeTransformObserver::OnImageRemoved(UARTrackedImage* image)
 	}
 }
 
-void UQRCodeTransformObserver::OnQRCodeAdded(UARTrackedQRCode* qrCode)
+void UQRCodeObserver::OnQRCodeAdded(UARTrackedQRCode* qrCode)
 {
 	FString qrText(L"QRCode Added:");
 	qrText.Append(qrCode->QRCode);
@@ -69,7 +73,7 @@ void UQRCodeTransformObserver::OnQRCodeAdded(UARTrackedQRCode* qrCode)
 	UpdateDebugVisual(qrCode->UniqueId, localToWorld);
 }
 
-void UQRCodeTransformObserver::OnQRCodeUpdated(UARTrackedQRCode* qrCode)
+void UQRCodeObserver::OnQRCodeUpdated(UARTrackedQRCode* qrCode)
 {
 	FString qrText(L"QRCode Updated:");
 	qrText.Append(qrCode->QRCode);
@@ -85,15 +89,10 @@ void UQRCodeTransformObserver::OnQRCodeUpdated(UARTrackedQRCode* qrCode)
 		OnCoordinateUpdated.Broadcast(qrCodes[qrCode->UniqueId]);
 	}
 
-	FString coordinateText(L"Coordinate:");
-	coordinateText.Append(qrCodes[qrCode->UniqueId].uniqueId.ToString());
-	coordinateText.Append(",");
-	coordinateText.Append(qrCode->UniqueId.ToString());
-	DebugHelper::PrintDebugError(coordinateText, 10);
 	UpdateDebugVisual(qrCode->UniqueId, localToWorld);
 }
 
-void UQRCodeTransformObserver::OnQRCodeRemoved(UARTrackedQRCode* qrCode)
+void UQRCodeObserver::OnQRCodeRemoved(UARTrackedQRCode* qrCode)
 {
 	FString qrText(L"QRCode Removed:");
 	qrText.Append(qrCode->QRCode);
@@ -114,7 +113,7 @@ void UQRCodeTransformObserver::OnQRCodeRemoved(UARTrackedQRCode* qrCode)
 	DestroyDebugVisual(qrCode->UniqueId);
 }
 
-void UQRCodeTransformObserver::UpdateDebugVisual(const FGuid& uniqueId, const FTransform& localToWorld)
+void UQRCodeObserver::UpdateDebugVisual(const FGuid& uniqueId, const FTransform& localToWorld)
 {
 	AActor* debugVisual;
 	if (debugVisuals.Contains(uniqueId))
@@ -132,7 +131,7 @@ void UQRCodeTransformObserver::UpdateDebugVisual(const FGuid& uniqueId, const FT
 	}
 }
 
-void UQRCodeTransformObserver::DestroyDebugVisual(const FGuid& uniqueId)
+void UQRCodeObserver::DestroyDebugVisual(const FGuid& uniqueId)
 {
 	if (debugVisuals.Contains(uniqueId))
 	{

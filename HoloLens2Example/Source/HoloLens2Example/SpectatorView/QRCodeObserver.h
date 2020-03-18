@@ -7,28 +7,17 @@
 #include "HoloLensARFunctionLibrary.h"
 #include "ARTrackable.h"
 #include "ARTrackableNotifyComponent.h"
-#include "HoloLensTransformObserver.h"
 #include "QRCode.h"
-#include "QRCodeTransformObserver.generated.h"
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCoordinateDelegate, const FCoordinate&, coordinate);
-
+#include "QRCodeObserver.generated.h"
 
 UCLASS( ClassGroup=(SpectatorView), meta=(BlueprintSpawnableComponent) )
-class HOLOLENS2EXAMPLE_API UQRCodeTransformObserver : public UARTrackableNotifyComponent
+class HOLOLENS2EXAMPLE_API UQRCodeObserver : public UARTrackableNotifyComponent, public ICoordinateObserver
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UQRCodeTransformObserver();
-
-	UPROPERTY(BlueprintAssignable, Category = "SpectatorView")
-	FCoordinateDelegate OnCoordinateAdded;
-	UPROPERTY(BlueprintAssignable, Category = "SpectatorView")
-	FCoordinateDelegate OnCoordinateUpdated;
-	UPROPERTY(BlueprintAssignable, Category = "SpectatorView")
-	FCoordinateDelegate OnCoordinateRemoved;
+	UQRCodeObserver();
 
 protected:
 	// Called when the game starts

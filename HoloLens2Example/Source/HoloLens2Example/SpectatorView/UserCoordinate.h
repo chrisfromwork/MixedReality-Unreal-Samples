@@ -11,7 +11,7 @@ struct FUserCoordinate : public FCoordinate
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	int32 playerId;
 
 	FUserCoordinate() : FCoordinate()
