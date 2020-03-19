@@ -11,7 +11,8 @@ ACoordinateManager::ACoordinateManager() : Super()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	if (GetLocalRole() == ROLE_Authority)
+	if (GetLocalRole() == ROLE_Authority ||
+		GetLocalRole() == ROLE_None)
 	{
 		SetReplicates(true);
 		SetReplicateMovement(true);
@@ -49,7 +50,8 @@ void ACoordinateManager::BeginPlay()
 
 void ACoordinateManager::UpdateCoordinate(const FUserCoordinate& coordinate)
 {
-	if (GetLocalRole() == ROLE_Authority)
+	if (GetLocalRole() == ROLE_Authority ||
+		GetLocalRole() == ROLE_None)
 	{
 		Coordinates.Emplace(coordinate.uniqueId, coordinate);
 		FireCoordinateUpdated(coordinate);
@@ -63,7 +65,8 @@ void ACoordinateManager::UpdateCoordinate(const FUserCoordinate& coordinate)
 
 void ACoordinateManager::RemoveCoordinate(const FGuid& uniqueId)
 {
-	if (GetLocalRole() == ROLE_Authority)
+	if (GetLocalRole() == ROLE_Authority ||
+		GetLocalRole() == ROLE_None)
 	{
 		if (Coordinates.Contains(uniqueId))
 		{
