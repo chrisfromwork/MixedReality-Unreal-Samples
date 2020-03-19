@@ -63,7 +63,7 @@ void UQRCodeObserver::OnQRCodeAdded(UARTrackedQRCode* qrCode)
 	DebugHelper::PrintDebugLog(qrText, 1);
 
 	FTransform localToWorld = FTransform{ QRCodeRotation } * qrCode->GetLocalToWorldTransform();
-	qrCodes.FindOrAdd(qrCode->UniqueId, FQRCode{ qrCode, localToWorld });
+	qrCodes.Emplace(qrCode->UniqueId, FQRCode{ qrCode, localToWorld });
 
 	if (OnCoordinateAdded.IsBound())
 	{
@@ -82,7 +82,7 @@ void UQRCodeObserver::OnQRCodeUpdated(UARTrackedQRCode* qrCode)
 	DebugHelper::PrintDebugLog(qrText, 1);
 
 	FTransform localToWorld = FTransform{ QRCodeRotation } *qrCode->GetLocalToWorldTransform();
-	qrCodes.FindOrAdd(qrCode->UniqueId, FQRCode{ qrCode, localToWorld });
+	qrCodes.Emplace(qrCode->UniqueId, FQRCode{ qrCode, localToWorld });
 
 	if (OnCoordinateUpdated.IsBound())
 	{
@@ -104,7 +104,7 @@ void UQRCodeObserver::OnQRCodeRemoved(UARTrackedQRCode* qrCode)
 	{
 		if (OnCoordinateRemoved.IsBound())
 		{
-			OnCoordinateRemoved.Broadcast(qrCodes[qrCode->UniqueId]);
+			OnCoordinateRemoved.Broadcast(qrCode->UniqueId);
 		}
 
 		qrCodes.Remove(qrCode->UniqueId);
@@ -122,7 +122,7 @@ void UQRCodeObserver::UpdateDebugVisual(const FGuid& uniqueId, const FTransform&
 	}
 	else if(DebugHelper::TryCreateDebugVisual(GetOwner()->GetWorld(), debugVisual))
 	{
-		debugVisuals.FindOrAdd(uniqueId, debugVisual);
+		debugVisuals.Emplace(uniqueId, debugVisual);
 	}
 
 	if (debugVisual)

@@ -7,41 +7,23 @@
 #include "QRCodeObserver.h"
 #include "SimulatedCoordinateObserver.h"
 #include "DebugHelper.h"
+#include "UnrealNetwork.h"
 
-UCoordinateReporter::UCoordinateReporter(class FObjectInitializer const& initializer) : Super(initializer)
+UCoordinateReporter::UCoordinateReporter() : Super()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+}
+
+void UCoordinateReporter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UCoordinateReporter, PlayerId);
 }
 
 void UCoordinateReporter::BeginPlay()
 {
 	Super::BeginPlay();
-	GetOwner()->SetReplicates(true);
 	PlayerId = InvalidPlayerId;
-
-	auto qrCodeObserver = Cast<UQRCodeObserver>(GetOwner()->GetComponentByClass(UQRCodeObserver::StaticClass()));
-	if (qrCodeObserver)
-	{
-		qrCodeObserver->OnCoordinateAdded.AddDynamic(this, &UCoordinateReporter::OnCoordinateAdded);
-		qrCodeObserver->OnCoordinateUpdated.AddDynamic(this, &UCoordinateReporter::OnCoordinateUpdated);
-		qrCodeObserver->OnCoordinateRemoved.AddDynamic(this, &UCoordinateReporter::OnCoordinateRemoved);
-	}
-	else
-	{
-		DebugHelper::PrintDebugError(TEXT("UCoordinateReporter: Failed to find UQRCodeObserver"), 10);
-	}
-
-	auto simulatedCoordinateObserver = Cast<USimulatedCoordinateObserver>(GetOwner()->GetComponentByClass(USimulatedCoordinateObserver::StaticClass()));
-	if (simulatedCoordinateObserver)
-	{
-		simulatedCoordinateObserver->OnCoordinateAdded.AddDynamic(this, &UCoordinateReporter::OnCoordinateAdded);
-		simulatedCoordinateObserver->OnCoordinateUpdated.AddDynamic(this, &UCoordinateReporter::OnCoordinateUpdated);
-		simulatedCoordinateObserver->OnCoordinateRemoved.AddDynamic(this, &UCoordinateReporter::OnCoordinateRemoved);
-	}
-	else
-	{
-		DebugHelper::PrintDebugError(TEXT("UCoordinateReporter: Failed to find USimulatedCoordinateObserver"), 10);
-	}
 }
 
 void UCoordinateReporter::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -56,6 +38,33 @@ void UCoordinateReporter::TickComponent(float DeltaTime, ELevelTick TickType, FA
 			if (playerState != nullptr)
 			{
 				PlayerId = playerState->PlayerId;
+
+				if (pawn->IsLocallyControlled())
+				{
+					auto qrCodeObserver = Cast<UQRCodeObserver>(GetOwner()->GetComponentByClass(UQRCodeObserver::StaticClass()));
+					if (qrCodeObserver)
+					{
+						qrCodeObserver->OnCoordinateAdded.AddDynamic(this, &UCoordinateReporter::OnCoordinateAdded);
+						qrCodeObserver->OnCoordinateUpdated.AddDynamic(this, &UCoordinateReporter::OnCoordinateUpdated);
+						qrCodeObserver->OnCoordinateRemoved.AddDynamic(this, &UCoordinateReporter::OnCoordinateRemoved);
+					}
+					else
+					{
+						DebugHelper::PrintDebugError(FString::Printf(TEXT("UCoordinateReporter:%d: Failed to find UQRCodeObserver"), PlayerId), 10);
+					}
+
+					auto simulatedCoordinateObserver = Cast<USimulatedCoordinateObserver>(GetOwner()->GetComponentByClass(USimulatedCoordinateObserver::StaticClass()));
+					if (simulatedCoordinateObserver)
+					{
+						simulatedCoordinateObserver->OnCoordinateAdded.AddDynamic(this, &UCoordinateReporter::OnCoordinateAdded);
+						simulatedCoordinateObserver->OnCoordinateUpdated.AddDynamic(this, &UCoordinateReporter::OnCoordinateUpdated);
+						simulatedCoordinateObserver->OnCoordinateRemoved.AddDynamic(this, &UCoordinateReporter::OnCoordinateRemoved);
+					}
+					else
+					{
+						DebugHelper::PrintDebugError(FString::Printf(TEXT("UCoordinateReporter:%d: Failed to find USimulatedCoordinateObserver"), PlayerId), 10);
+					}
+				}
 			}
 			else
 			{
@@ -79,27 +88,23 @@ void UCoordinateReporter::OnCoordinateUpdated(const FCoordinate& coordinate)
 	CoordinateUpdatedImpl(coordinate);
 }
 
-void UCoordinateReporter::OnCoordinateRemoved(const FCoordinate& coordinate)
+void UCoordinateReporter::OnCoordinateRemoved(const FGuid& uniqueId)
 {
-	CoordinateRemovedImpl(coordinate);
+	CoordinateRemovedImpl(uniqueId);
 }
 
 void UCoordinateReporter::CoordinateUpdatedImpl_Implementation(const FCoordinate& coordinate)
 {
 	if (ACoordinateManager::Instance() == nullptr)
 	{
-		ACoordinateManager::PopulateInstance(GetWorld(), GetOwner());
+		ACoordinateManager::PopulateInstance(GetWorld());
 	}
 
 	if (ACoordinateManager::Instance() != nullptr &&
 		PlayerId != InvalidPlayerId)
 	{
-		DebugHelper::PrintDebugLog("UCoordinateReporter: reporting coordinate update.", 1);
+		DebugHelper::PrintDebugLog(FString::Printf(TEXT("UCoordinateReporter:%d: reporting coordinate update."), PlayerId), 1);
 		ACoordinateManager::Instance()->UpdateCoordinate(FUserCoordinate{ PlayerId, coordinate });
-	}
-	else if (PlayerId == InvalidPlayerId)
-	{
-		DebugHelper::PrintDebugError(TEXT("Unable to report coordinate based on invalid player id"), 10);
 	}
 }
 
@@ -108,16 +113,16 @@ bool UCoordinateReporter::CoordinateUpdatedImpl_Validate(const FCoordinate& coor
 	return true;
 }
 
-void UCoordinateReporter::CoordinateRemovedImpl_Implementation(const FCoordinate& coordinate)
+void UCoordinateReporter::CoordinateRemovedImpl_Implementation(const FGuid& uniqueId)
 {
 	if (PlayerId != InvalidPlayerId)
 	{
-		DebugHelper::PrintDebugLog(TEXT("UCoordinateReporter: reporting coordinate removed."), 1);
-		ACoordinateManager::Instance()->RemoveCoordinate(coordinate.uniqueId);
+		DebugHelper::PrintDebugLog(FString::Printf(TEXT("UCoordinateReporter:%d: reporting coordinate removed."), PlayerId), 1);
+		ACoordinateManager::Instance()->RemoveCoordinate(uniqueId);
 	}
 }
 
-bool UCoordinateReporter::CoordinateRemovedImpl_Validate(const FCoordinate& coordinate)
+bool UCoordinateReporter::CoordinateRemovedImpl_Validate(const FGuid& uniqueId)
 {
 	return true;
 }

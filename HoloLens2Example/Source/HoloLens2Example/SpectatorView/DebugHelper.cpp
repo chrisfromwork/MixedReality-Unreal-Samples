@@ -5,7 +5,7 @@
 #include <EngineGlobals.h>
 #include <Runtime/Engine/Classes/Engine/Engine.h>
 
-bool DebugHelper::logEnabled = false;
+bool DebugHelper::logEnabled = true;
 
 void DebugHelper::SetDebugLogEnabled(bool value)
 {

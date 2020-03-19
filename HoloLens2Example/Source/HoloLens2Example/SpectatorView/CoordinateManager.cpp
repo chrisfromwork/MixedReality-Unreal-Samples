@@ -7,28 +7,32 @@
 
 ACoordinateManager* ACoordinateManager::instance = nullptr;
 
-ACoordinateManager::ACoordinateManager(class FObjectInitializer const & initializer) : Super(initializer)
+ACoordinateManager::ACoordinateManager() : Super()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	SetReplicates(true);
+
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		SetReplicates(true);
+		SetReplicateMovement(true);
+
+		// The coordinate manager doesn't appear to replicate if it doesn't have a root component defined.
+		auto root = CreateDefaultSubobject<USceneComponent>(FName{ "Root" });
+		root->RegisterComponent();
+		root->SetWorldLocation(FVector{ 0, 0, 0 });
+		root->SetWorldRotation(FRotator{ 0, 0, 0 });
+		RootComponent = root;
+	}
 }
 
-void ACoordinateManager::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+void ACoordinateManager::PopulateInstance(UWorld* world)
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ACoordinateManager, Coordinates);
-}
-
-void ACoordinateManager::PopulateInstance(UWorld* world, AActor* creator)
-{
-	if (instance == nullptr &&
-		creator != nullptr &&
-		creator->GetLocalRole() == ROLE_Authority)
+	if (instance == nullptr)
 	{
 		FActorSpawnParameters spawnParams;
 		spawnParams.Name = FName{ "CoordinateManager" };
 		spawnParams.Owner = nullptr;
-		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding;
+		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		ACoordinateManager* manager = world->SpawnActor<ACoordinateManager>(ACoordinateManager::StaticClass(), FVector{ 0, 0, 0 }, FRotator{ 0, 0, 0 }, spawnParams);
 		if (manager != nullptr)
 		{
@@ -41,32 +45,70 @@ void ACoordinateManager::BeginPlay()
 {
 	Super::BeginPlay();
 	DebugHelper::PrintDebugLog("ACoordinateManager: begin play.", 1);
-	SetReplicates(true);
 }
 
 void ACoordinateManager::UpdateCoordinate(const FUserCoordinate& coordinate)
 {
-	if (GetLocalRole() != ROLE_Authority)
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		DebugHelper::PrintDebugError(FString::FromInt(GetLocalRole()), 10);
+		Coordinates.Emplace(coordinate.uniqueId, coordinate);
+		FireCoordinateUpdated(coordinate);
+	}
+	else
+	{
+		DebugHelper::PrintDebugError(FString::Printf(TEXT("ACoordinateManager:%d: attempted to update coordinate from client, which isn't allowed."), GetLocalRole()), 1);
 		return;
 	}
-
-	DebugHelper::PrintDebugLog("ACoordinateManager: updating coordinate.", 1);
-	Coordinates.FindOrAdd(coordinate.uniqueId, coordinate);
 }
 
 void ACoordinateManager::RemoveCoordinate(const FGuid& uniqueId)
 {
-	if (GetLocalRole() != ROLE_Authority)
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		DebugHelper::PrintDebugError("ACoordinateManager: attempted to update coordinate from client, which isn't allowed.", 10);
+		if (Coordinates.Contains(uniqueId))
+		{
+			Coordinates.Remove(uniqueId);
+		}
+
+		FireCoordinateRemoved(uniqueId);
+	}
+	else
+	{
+		DebugHelper::PrintDebugError(FString::Printf(TEXT("ACoordinateManager:%d: attempted to update coordinate from client, which isn't allowed."), GetLocalRole()), 1);
 		return;
 	}
+}
 
-	DebugHelper::PrintDebugLog("ACoordinateManager: removing coordinate.", 1);
+void ACoordinateManager::FireCoordinateUpdated_Implementation(const FUserCoordinate& coordinate)
+{
+	DebugHelper::PrintDebugLog(FString::Printf(TEXT("ACoordinateManager:%d: firing coordinate updated: %s."), (int32)GetLocalRole(), *coordinate.uniqueId.ToString()), 1);
+	Coordinates.Emplace(coordinate.uniqueId, coordinate);
+	if (CoordinateUpdated.IsBound())
+	{
+		CoordinateUpdated.Broadcast(coordinate);
+	}
+}
+
+bool ACoordinateManager::FireCoordinateUpdated_Validate(const FUserCoordinate& coordinate)
+{
+	return true;
+}
+
+void ACoordinateManager::FireCoordinateRemoved_Implementation(const FGuid& uniqueId)
+{
+	DebugHelper::PrintDebugLog(FString::Printf(TEXT("ACoordinateManager:%d: firing coordinate removed: %s."), (int32)GetLocalRole(), *uniqueId.ToString()), 1);
 	if (Coordinates.Contains(uniqueId))
 	{
 		Coordinates.Remove(uniqueId);
 	}
+
+	if (CoordinateRemoved.IsBound())
+	{
+		CoordinateRemoved.Broadcast(uniqueId);
+	}
+}
+
+bool ACoordinateManager::FireCoordinateRemoved_Validate(const FGuid& uniqueId)
+{
+	return true;
 }

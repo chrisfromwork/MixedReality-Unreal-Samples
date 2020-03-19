@@ -45,7 +45,7 @@ void USimulatedCoordinateObserver::TickComponent(float DeltaTime, ELevelTick Tic
 		if (OnCoordinateUpdated.IsBound() &&
 			deltaSinceLastUpdate > deltaBetweenUpdates)
 		{
-			DebugHelper::PrintDebugLog(TEXT("USimulatedCoordinateObserver: Sending coordinate update"), 1);
+			coordinate.lastUpdate = FDateTime::UtcNow();
 			OnCoordinateUpdated.Broadcast(coordinate);
 			deltaSinceLastUpdate = 0;
 		}

@@ -10,20 +10,30 @@
 UCLASS()
 class HOLOLENS2EXAMPLE_API ACoordinateManager : public AActor
 {
-	GENERATED_UCLASS_BODY()
+	GENERATED_BODY()
 
 public:
-	ACoordinateManager();
 	static ACoordinateManager* Instance() { return instance; }
-	static void PopulateInstance(UWorld* world, AActor* creator);
+	static void PopulateInstance(UWorld* world);
+
+	ACoordinateManager();
 
 	void UpdateCoordinate(const FUserCoordinate& coordinate);
 	void RemoveCoordinate(const FGuid& uniqueId);
 
-	UPROPERTY(Replicated, EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "SpectatorView")
 	TMap<FGuid, FUserCoordinate> Coordinates;
+	UPROPERTY(BlueprintAssignable, Category = "SpectatorView")
+	FCoordinateDelegate CoordinateUpdated;
+	UPROPERTY(BlueprintAssignable, Category = "SpectatorView")
+	FCoordinateIdDelegate CoordinateRemoved;
 
 protected:
-	virtual void BeginPlay() override;
 	static ACoordinateManager* instance;
+
+	virtual void BeginPlay() override;
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void FireCoordinateUpdated(const FUserCoordinate& coordinate);
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void FireCoordinateRemoved(const FGuid& uniqueId);
 };

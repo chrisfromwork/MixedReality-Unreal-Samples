@@ -5,18 +5,21 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "UserCoordinate.h"
+#include "CoordinateManager.h"
 #include "CoordinateReporter.generated.h"
 
 
 UCLASS( ClassGroup=(SpectatorView), meta=(BlueprintSpawnableComponent) )
 class HOLOLENS2EXAMPLE_API UCoordinateReporter : public UActorComponent
 {
-	GENERATED_UCLASS_BODY()
+	GENERATED_BODY()
 
 public:	
 	UCoordinateReporter();
+	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UPROPERTY(Replicated, EditAnywhere)
 	int32 PlayerId;
 	const int32 InvalidPlayerId = -1;
 
@@ -27,10 +30,10 @@ protected:
 	UFUNCTION()
 	void OnCoordinateUpdated(const FCoordinate& coordinate);
 	UFUNCTION()
-	void OnCoordinateRemoved(const FCoordinate& coordinate);
+	void OnCoordinateRemoved(const FGuid& uniqueId);
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void CoordinateUpdatedImpl(const FCoordinate& coordinate);
 	UFUNCTION(Server, Reliable, WithValidation)
-	void CoordinateRemovedImpl(const FCoordinate& coordinate);
+	void CoordinateRemovedImpl(const FGuid& uniqueId);
 };

@@ -32,6 +32,7 @@ struct FCoordinate
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCoordinateDelegate, const FCoordinate&, coordinate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCoordinateIdDelegate, const FGuid&, coordinate);
 
 class ICoordinateObserver
 {
@@ -41,5 +42,5 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "SpectatorView")
 	FCoordinateDelegate OnCoordinateUpdated;
 	UPROPERTY(BlueprintAssignable, Category = "SpectatorView")
-	FCoordinateDelegate OnCoordinateRemoved;
+	FCoordinateIdDelegate OnCoordinateRemoved;
 };
