@@ -4,6 +4,7 @@
 #include "CoordinateManager.h"
 #include "UnrealNetwork.h"
 #include "DebugHelper.h"
+#include "Engine/World.h"
 
 ACoordinateManager* ACoordinateManager::instance = nullptr;
 
@@ -19,7 +20,7 @@ ACoordinateManager::ACoordinateManager() : Super()
 
 		// The coordinate manager doesn't appear to replicate if it doesn't have a root component defined.
 		auto root = CreateDefaultSubobject<USceneComponent>(FName{ "Root" });
-		root->RegisterComponent();
+		root->RegisterComponentWithWorld(GetWorld());
 		root->SetWorldLocation(FVector{ 0, 0, 0 });
 		root->SetWorldRotation(FRotator{ 0, 0, 0 });
 		RootComponent = root;
@@ -48,12 +49,22 @@ void ACoordinateManager::BeginPlay()
 	DebugHelper::PrintDebugLog("ACoordinateManager: begin play.", 1);
 }
 
+void ACoordinateManager::BeginDestroy()
+{
+	Super::BeginDestroy();
+	DebugHelper::PrintDebugLog("ACoordinateManager: begin destroy.", 1);
+	if (this == instance)
+	{
+		instance = nullptr;
+	}
+}
+
 void ACoordinateManager::UpdateCoordinate(const FUserCoordinate& coordinate)
 {
 	if (GetLocalRole() == ROLE_Authority ||
 		GetLocalRole() == ROLE_None)
 	{
-		Coordinates.Emplace(coordinate.uniqueId, coordinate);
+		Coordinates.Add(coordinate.uniqueId, coordinate);
 		FireCoordinateUpdated(coordinate);
 	}
 	else
@@ -85,7 +96,7 @@ void ACoordinateManager::RemoveCoordinate(const FGuid& uniqueId)
 void ACoordinateManager::FireCoordinateUpdated_Implementation(const FUserCoordinate& coordinate)
 {
 	DebugHelper::PrintDebugLog(FString::Printf(TEXT("ACoordinateManager:%d: firing coordinate updated: %s."), (int32)GetLocalRole(), *coordinate.uniqueId.ToString()), 1);
-	Coordinates.Emplace(coordinate.uniqueId, coordinate);
+	Coordinates.Add(coordinate.uniqueId, coordinate);
 	if (CoordinateUpdated.IsBound())
 	{
 		CoordinateUpdated.Broadcast(coordinate);

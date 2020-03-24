@@ -19,7 +19,7 @@ struct FSimulatedCoordinate : public FCoordinate
 };
 
 UCLASS( ClassGroup=(SpectatorView), meta=(BlueprintSpawnableComponent) )
-class HOLOLENS2EXAMPLE_API USimulatedCoordinateObserver : public UActorComponent, public ICoordinateObserver
+class SPECTATORVIEW_API USimulatedCoordinateObserver : public UActorComponent, public ICoordinateObserver
 {
 	GENERATED_BODY()
 

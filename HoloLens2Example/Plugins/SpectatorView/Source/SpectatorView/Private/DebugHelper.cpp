@@ -28,10 +28,10 @@ void DebugHelper::PrintDebugError(FString text, float displayTime)
 bool DebugHelper::TryCreateDebugVisual(UWorld* world, AActor*& actor)
 {
 	actor = nullptr;
-	UObject* spawnActor = Cast<UObject>(StaticLoadObject(UObject::StaticClass(), NULL, TEXT("/Game/SpectatorView/DebugVisual")));
+	UObject* spawnActor = Cast<UObject>(StaticLoadObject(UObject::StaticClass(), NULL, TEXT("/SpectatorView/BP_DebugVisual")));
 	if (!spawnActor)
 	{
-		DebugHelper::PrintDebugError(TEXT("Failed to find debug visual: /Game/SpectatorView/DebugVisual"), 15);
+		DebugHelper::PrintDebugError(TEXT("Failed to find debug visual: /SpectatorView/BP_DebugVisual"), 15);
 		return false;
 	}
 

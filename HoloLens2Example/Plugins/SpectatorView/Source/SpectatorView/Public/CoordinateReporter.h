@@ -5,12 +5,11 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "UserCoordinate.h"
-#include "CoordinateManager.h"
 #include "CoordinateReporter.generated.h"
 
 
 UCLASS( ClassGroup=(SpectatorView), meta=(BlueprintSpawnableComponent) )
-class HOLOLENS2EXAMPLE_API UCoordinateReporter : public UActorComponent
+class SPECTATORVIEW_API UCoordinateReporter : public UActorComponent
 {
 	GENERATED_BODY()
 

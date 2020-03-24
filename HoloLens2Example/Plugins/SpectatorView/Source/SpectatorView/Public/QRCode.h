@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Coordinate.h"
-#include "ARTrackable.h"
 #include "QRCode.Generated.h"
 
 USTRUCT(BlueprintType)
@@ -17,12 +16,12 @@ struct FQRCode : public FCoordinate
 		type = TEXT("QRCode");
 	}
 
-	FQRCode(const UARTrackedQRCode* qrCode, const FTransform& transform) : FCoordinate()
+	FQRCode(const FGuid& qrCodeId, const FString& qrCodeData, const FTransform& transform) : FCoordinate()
 	{
-		uniqueId = qrCode->UniqueId;
+		uniqueId = qrCodeId;
 		localToWorld = transform;
 		lastUpdate = FDateTime::UtcNow();
 		type = TEXT("QRCode");
-		data = qrCode->QRCode;
+		data = qrCodeData;
 	}
 };

@@ -7,8 +7,8 @@ public class HoloLens2ExampleTarget : TargetRules
 {
 	public HoloLens2ExampleTarget(TargetInfo Target) : base(Target)
 	{
-		Type = TargetType.Game;
+        Type = TargetType.Game;
 
-		ExtraModuleNames.AddRange( new string[] { "HoloLens2Example" } );
-	}
+        ExtraModuleNames.AddRange(new string[] { "HoloLens2Example" });
+    }
 }

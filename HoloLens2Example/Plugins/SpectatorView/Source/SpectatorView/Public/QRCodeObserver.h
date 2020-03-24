@@ -4,14 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "HoloLensARFunctionLibrary.h"
 #include "ARTrackable.h"
 #include "ARTrackableNotifyComponent.h"
 #include "QRCode.h"
 #include "QRCodeObserver.generated.h"
 
 UCLASS( ClassGroup=(SpectatorView), meta=(BlueprintSpawnableComponent) )
-class HOLOLENS2EXAMPLE_API UQRCodeObserver : public UARTrackableNotifyComponent, public ICoordinateObserver
+class SPECTATORVIEW_API UQRCodeObserver : public UARTrackableNotifyComponent, public ICoordinateObserver
 {
 	GENERATED_BODY()
 
@@ -22,6 +21,7 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
 	virtual void OnQRCodeAdded(UARTrackedQRCode* qrCode);
 	virtual void OnQRCodeUpdated(UARTrackedQRCode* qrCode);
 	virtual void OnQRCodeRemoved(UARTrackedQRCode* qrCode);

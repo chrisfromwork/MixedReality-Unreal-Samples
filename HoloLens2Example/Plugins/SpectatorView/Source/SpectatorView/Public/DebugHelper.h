@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 
-class HOLOLENS2EXAMPLE_API DebugHelper
+class SPECTATORVIEW_API DebugHelper
 {
 public:
 	static void SetDebugLogEnabled(bool value);

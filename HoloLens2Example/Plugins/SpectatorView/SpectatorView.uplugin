@@ -1,0 +1,41 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "SpectatorView",
+  "Description": "",
+  "Category": "Other",
+  "CreatedBy": "Microsoft",
+  "CreatedByURL": "",
+  "DocsURL": "",
+  "MarketplaceURL": "",
+  "SupportURL": "",
+  "CanContainContent": true,
+  "IsBetaVersion": false,
+  "IsExperimentalVersion": true,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "SpectatorView",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "HoloLensAR",
+      "Enabled": true,
+      "SupportedTargetPlatforms": [
+        "HoloLens",
+        "Win64"
+      ]
+    },
+    {
+      "Name": "GoogleARCore",
+      "Enabled": true,
+      "SupportedTargetPlatforms": [
+        "Android"
+      ]
+    }
+  ]
+}

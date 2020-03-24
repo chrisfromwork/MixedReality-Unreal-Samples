@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.24",
+	"EngineAssociation": "{235E2F41-4928-E50E-F5CE-8E842410A7B8}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -12,27 +12,35 @@
 	],
 	"Plugins": [
 		{
-			"Name": "MagicLeapMedia",
-			"Enabled": false,
-			"SupportedTargetPlatforms": [
-				"Lumin"
-			]
-		},
-		{
-			"Name": "SteamVR",
-			"Enabled": false
-		},
-		{
-			"Name": "OculusVR",
-			"Enabled": false
-		},
-		{
 			"Name": "WindowsMixedReality",
 			"Enabled": true,
 			"SupportedTargetPlatforms": [
 				"Win64",
 				"HoloLens"
 			]
+		},
+		{
+			"Name": "HoloLensAR",
+			"Enabled": true,
+			"SupportedTargetPlatforms": [
+				"HoloLens",
+				"Win64"
+			]
+		},
+		{
+			"Name": "GoogleARCore",
+			"Enabled": true,
+			"SupportedTargetPlatforms": [
+				"Android"
+			]
+		},
+		{
+			"Name": "SpectatorView",
+			"Enabled": true
+		},
+		{
+			"Name": "DatasmithContent",
+			"Enabled": false
 		}
 	]
 }

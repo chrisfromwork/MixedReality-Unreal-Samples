@@ -5,16 +5,16 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Camera/CameraComponent.h"
-#include "HoloLensTransformObserver.generated.h"
+#include "CameraObserver.generated.h"
 
 UCLASS( ClassGroup = (SpectatorView), meta = (BlueprintSpawnableComponent) )
-class HOLOLENS2EXAMPLE_API UHoloLensTransformObserver : public UActorComponent
+class SPECTATORVIEW_API UCameraObserver : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UHoloLensTransformObserver();
+	UCameraObserver();
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 

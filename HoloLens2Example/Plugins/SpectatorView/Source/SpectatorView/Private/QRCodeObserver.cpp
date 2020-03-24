@@ -1,8 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "QRCodeObserver.h"
 #include "DebugHelper.h"
+
+#if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
+#include "HoloLensARFunctionLibrary.h"
+#endif
+
 
 // Sets default values for this component's properties
 UQRCodeObserver::UQRCodeObserver()
@@ -17,6 +21,7 @@ void UQRCodeObserver::BeginPlay()
 {
 	Super::BeginPlay();
 
+#if PLATFORM_WINDOWS || PLATFORM_HOLOLENS
 	if (Cast<APawn>(GetOwner()) != nullptr &&
 		Cast<APawn>(GetOwner())->IsLocallyControlled())
 	{
@@ -25,6 +30,7 @@ void UQRCodeObserver::BeginPlay()
 		OnRemoveTrackedImage.AddDynamic(this, &UQRCodeObserver::OnImageRemoved);
 		UHoloLensARFunctionLibrary::StartQRCodeCapture();
 	}
+#endif
 }
 
 void UQRCodeObserver::OnImageAdded(UARTrackedImage* image)
@@ -56,14 +62,14 @@ void UQRCodeObserver::OnImageRemoved(UARTrackedImage* image)
 
 void UQRCodeObserver::OnQRCodeAdded(UARTrackedQRCode* qrCode)
 {
-	FString qrText(L"QRCode Added:");
+	FString qrText = FString(TEXT("QRCode Added:"));
 	qrText.Append(qrCode->QRCode);
 	qrText.Append(", ");
 	qrText.Append(qrCode->UniqueId.ToString());
 	DebugHelper::PrintDebugLog(qrText, 1);
 
 	FTransform localToWorld = FTransform{ QRCodeRotation } * qrCode->GetLocalToWorldTransform();
-	qrCodes.Emplace(qrCode->UniqueId, FQRCode{ qrCode, localToWorld });
+	qrCodes.Add(qrCode->UniqueId, FQRCode{ qrCode->UniqueId, qrCode->QRCode, localToWorld });
 
 	if (OnCoordinateAdded.IsBound())
 	{
@@ -75,14 +81,14 @@ void UQRCodeObserver::OnQRCodeAdded(UARTrackedQRCode* qrCode)
 
 void UQRCodeObserver::OnQRCodeUpdated(UARTrackedQRCode* qrCode)
 {
-	FString qrText(L"QRCode Updated:");
+	FString qrText = FString(TEXT("QRCode Updated:"));
 	qrText.Append(qrCode->QRCode);
 	qrText.Append(", ");
 	qrText.Append(qrCode->UniqueId.ToString());
 	DebugHelper::PrintDebugLog(qrText, 1);
 
 	FTransform localToWorld = FTransform{ QRCodeRotation } *qrCode->GetLocalToWorldTransform();
-	qrCodes.Emplace(qrCode->UniqueId, FQRCode{ qrCode, localToWorld });
+	qrCodes.Add(qrCode->UniqueId, FQRCode{ qrCode->UniqueId, qrCode->QRCode, localToWorld });
 
 	if (OnCoordinateUpdated.IsBound())
 	{
@@ -94,7 +100,7 @@ void UQRCodeObserver::OnQRCodeUpdated(UARTrackedQRCode* qrCode)
 
 void UQRCodeObserver::OnQRCodeRemoved(UARTrackedQRCode* qrCode)
 {
-	FString qrText(L"QRCode Removed:");
+	FString qrText = FString(TEXT("QRCode Removed:"));
 	qrText.Append(qrCode->QRCode);
 	qrText.Append(", ");
 	qrText.Append(qrCode->UniqueId.ToString());
@@ -122,7 +128,7 @@ void UQRCodeObserver::UpdateDebugVisual(const FGuid& uniqueId, const FTransform&
 	}
 	else if(DebugHelper::TryCreateDebugVisual(GetOwner()->GetWorld(), debugVisual))
 	{
-		debugVisuals.Emplace(uniqueId, debugVisual);
+		debugVisuals.Add(uniqueId, debugVisual);
 	}
 
 	if (debugVisual)

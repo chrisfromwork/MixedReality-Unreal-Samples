@@ -1,6 +1,7 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
+using System;
 using System.Collections.Generic;
 
 public class HoloLens2ExampleEditorTarget : TargetRules
@@ -9,6 +10,6 @@ public class HoloLens2ExampleEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 
-		ExtraModuleNames.AddRange( new string[] { "HoloLens2Example" } );
+        ExtraModuleNames.AddRange( new string[] { "HoloLens2Example" } );
 	}
 }

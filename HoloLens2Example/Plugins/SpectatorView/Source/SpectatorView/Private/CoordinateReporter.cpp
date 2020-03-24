@@ -3,11 +3,12 @@
 
 #include "CoordinateReporter.h"
 #include "GameFramework/PlayerState.h"
+#include "UnrealNetwork.h"
 #include "CoordinateManager.h"
-#include "QRCodeObserver.h"
 #include "SimulatedCoordinateObserver.h"
 #include "DebugHelper.h"
-#include "UnrealNetwork.h"
+#include "QRCodeObserver.h"
+#include "GameFramework/Pawn.h"
 
 UCoordinateReporter::UCoordinateReporter() : Super()
 {
@@ -31,10 +32,10 @@ void UCoordinateReporter::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if (PlayerId == InvalidPlayerId)
 	{
-		auto pawn = Cast<APawn>(GetOwner());
+		APawn* pawn = Cast<APawn>(GetOwner());
 		if (pawn != nullptr)
 		{
-			auto playerState = pawn->GetPlayerState();
+			APlayerState* playerState = pawn->GetPlayerState();
 			if (playerState != nullptr)
 			{
 				PlayerId = playerState->PlayerId;

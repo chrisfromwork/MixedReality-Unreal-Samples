@@ -8,7 +8,7 @@
 #include "CoordinateManager.generated.h"
 
 UCLASS()
-class HOLOLENS2EXAMPLE_API ACoordinateManager : public AActor
+class SPECTATORVIEW_API ACoordinateManager : public AActor
 {
 	GENERATED_BODY()
 
@@ -32,6 +32,8 @@ protected:
 	static ACoordinateManager* instance;
 
 	virtual void BeginPlay() override;
+	virtual void BeginDestroy() override;
+
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void FireCoordinateUpdated(const FUserCoordinate& coordinate);
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
